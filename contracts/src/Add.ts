@@ -11,6 +11,9 @@ import { Field, SmartContract, state, State, method } from 'o1js';
  */
 export class Add extends SmartContract {
   @state(Field) num = State<Field>();
+  events = {
+    'updated-number': Field,
+  };
 
   init() {
     super.init();
@@ -21,5 +24,12 @@ export class Add extends SmartContract {
     const currentState = this.num.getAndAssertEquals();
     const newState = currentState.add(2);
     this.num.set(newState);
+  }
+
+  @method add(number: Field) {
+    const currentState = this.num.getAndAssertEquals();
+    const newState = currentState.add(number);
+    this.num.set(newState);
+    this.emitEvent('updated-number', newState);
   }
 }

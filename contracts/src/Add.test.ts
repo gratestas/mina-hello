@@ -64,4 +64,23 @@ describe('Add', () => {
     const updatedNum = zkApp.num.get();
     expect(updatedNum).toEqual(Field(3));
   });
+
+  it('validates custom Add', async () => {
+    await localDeploy();
+
+    const currentNubmer = zkApp.num.get();
+    const txn = await Mina.transaction(senderAccount, () =>
+      zkApp.add(Field(5))
+    );
+    await txn.prove();
+    await txn.sign([senderKey]).send();
+
+    const updatedNumber = zkApp.num.get();
+    expect(updatedNumber).toEqual(Field(5).add(currentNubmer));
+
+    const events = await zkApp.fetchEvents();
+    const addNumberEventValue = events[0].event.data.toFields(null)[0];
+
+    expect(addNumberEventValue).toEqual(updatedNumber);
+  });
 });
